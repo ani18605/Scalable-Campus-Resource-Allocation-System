@@ -5,13 +5,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const output = document.getElementById('console-output');
 
     const fieldsSchema = {
-        'ADD_ROOM': ['Room ID (e.g. R101)', 'Block ID (e.g. C)', 'Floor', 'Capacity'],
-        'ADD_CLASSROOM': ['Class ID', 'Building ID', 'Floor', 'Capacity'],
         'ALLOCATE_ROOMS': ['Student Count', 'Preferred Block', 'Min Capacity'],
         'MAINTENANCE': ['Scope Type (ROOM/FLOOR/BLOCK)', 'Scope ID (e.g. R101, C 3)', 'Status (ON/OFF)'],
         'QUERY_FREE_ROOMS': ['Block ID', 'Consecutive Count'],
         'REPORT': ['Scope Type (BLOCK/CAMPUS)', 'Scope ID (e.g. C, ALL)'],
-        'BUILD_HOSTEL': ['Hostel Block ID (e.g. H1)', 'Number of Floors', 'Room Capacity'],
+        'BUILD_HOSTEL': ['Hostel Block ID (e.g. H1)', 'Number of Floors', 'Rooms per Floor', 'Students in one room'],
         'BUILD_CLASSROOM': ['Classroom Building ID (e.g. CB1)', 'Number of Floors', 'Classroom Capacity'],
         'BOOK_ANY_CLASSROOM': ['Building ID', 'Start Time (HH:MM)', 'End Time (HH:MM)', 'Min Seats Required']
     };
@@ -31,18 +29,37 @@ document.addEventListener('DOMContentLoaded', () => {
             label.style.color = 'var(--text-muted, #888)';
             label.style.marginBottom = '6px';
 
-            const input = document.createElement('input');
+            let fieldElement;
             if (placeholder.includes('Time')) {
-                input.type = 'time';
+                fieldElement = document.createElement('select');
+                fieldElement.required = true;
+                const defaultOption = document.createElement('option');
+                defaultOption.value = "";
+                defaultOption.textContent = "Select Time";
+                defaultOption.disabled = true;
+                defaultOption.selected = true;
+                fieldElement.appendChild(defaultOption);
+                
+                for (let h = 8; h <= 20; h++) {
+                    for (let m = 0; m < 60; m += 30) {
+                        const timeStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+                        const op = document.createElement('option');
+                        op.value = timeStr;
+                        op.textContent = timeStr;
+                        fieldElement.appendChild(op);
+                    }
+                }
             } else {
-                input.type = 'text';
+                fieldElement = document.createElement('input');
+                fieldElement.type = 'text';
+                fieldElement.placeholder = placeholder;
+                fieldElement.required = true;
             }
-            input.placeholder = placeholder;
-            input.required = true;
-            input.dataset.idx = idx;
+            
+            fieldElement.dataset.idx = idx;
             
             wrapper.appendChild(label);
-            wrapper.appendChild(input);
+            wrapper.appendChild(fieldElement);
             dynamicFields.appendChild(wrapper);
         });
     }
@@ -114,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const action = select.value;
-        const inputs = Array.from(dynamicFields.querySelectorAll('input'));
+        const inputs = Array.from(dynamicFields.querySelectorAll('input, select'));
         const args = inputs.map(i => i.value.trim()).join(' ');
 
         if (action === 'BOOK_ANY_CLASSROOM') {
@@ -146,18 +163,20 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (action === 'BUILD_HOSTEL') {
             const block = inputs[0].value.trim();
             const floors = parseInt(inputs[1].value);
-            const cap = parseInt(inputs[2].value);
-            const roomsPerFloor = 100;
+            const roomsPerFloor = parseInt(inputs[2].value);
+            const cap = parseInt(inputs[3].value);
             
-            appendLog(`BUILD_HOSTEL`, `Generating Hostel Block ${block} with ${floors} floors (100 rooms/floor)...`);
+            appendLog(`BUILD_HOSTEL`, `Generating Hostel Block ${block} with ${floors} floors (${roomsPerFloor} rooms/floor)...`);
             
+            const promises = [];
             for(let f = 1; f <= floors; f++) {
                 for(let r = 1; r <= roomsPerFloor; r++) {
                     const rId = `${block}-${f}${r.toString().padStart(2, '0')}`;
                     const cmd = `ADD_ROOM ${rId} ${block} ${f} ${cap}`;
-                    await executeCommand(cmd, true);
+                    promises.push(executeCommand(cmd, true));
                 }
             }
+            await Promise.all(promises);
             appendLog('SYSTEM', `Hostel Block ${block} fully constructed!`);
         } else if (action === 'BUILD_CLASSROOM') {
             const building = inputs[0].value.trim();
@@ -167,13 +186,15 @@ document.addEventListener('DOMContentLoaded', () => {
             
             appendLog(`BUILD_CLASSROOM`, `Generating Classroom Building ${building} with ${floors} floors (15 rooms/floor)...`);
             
+            const promises = [];
             for(let f = 1; f <= floors; f++) {
                 for(let c = 1; c <= classesPerFloor; c++) {
                     const cId = `CL_${building}-${f}${c.toString().padStart(2, '0')}`;
                     const cmd = `ADD_CLASSROOM ${cId} ${building} ${f} ${cap}`;
-                    await executeCommand(cmd, true);
+                    promises.push(executeCommand(cmd, true));
                 }
             }
+            await Promise.all(promises);
             appendLog('SYSTEM', `Classroom Building ${building} fully constructed!`);
         } else {
             const cmd = `${action} ${args}`;
