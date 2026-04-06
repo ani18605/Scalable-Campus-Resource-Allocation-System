@@ -10,6 +10,7 @@ std::string Allocator::allocateRooms(int count, const std::string& prefBlock, in
         if (remaining == 0) return;
         if (roomManager.blockRoomLists.find(blockId) == roomManager.blockRoomLists.end()) return;
         
+        auto st = roomManager.getBlockTree(blockId); // Ensure tree is finalized and sorted
         for (const auto& roomId : roomManager.blockRoomLists[blockId]) {
             auto room = roomManager.getRoom(roomId);
             if (room && room->status == RoomStatus::FREE && room->capacity >= minCap && room->capacity > room->occupied) {
@@ -72,7 +73,7 @@ std::string Allocator::reallocate(const std::string& scopeType, const std::strin
 
 std::string Allocator::queryFreeRooms(const std::string& blockId, int count) {
     auto st = roomManager.getBlockTree(blockId);
-    if (!st) return "NOT_FOUND";
+    if (!st) return "THIS DONESNT EXISTS";
     int idx = st->find_consecutive(count);
     if (idx == -1) return "NOT_FOUND";
     
