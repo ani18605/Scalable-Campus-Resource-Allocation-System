@@ -20,12 +20,6 @@ std::string ClassroomManager::bookClassroom(const std::string& classId, int star
 }
 
 std::string ClassroomManager::bookAnyClassroom(const std::string& buildingId, int startMin, int endMin, int seats) {
-    bool buildingExists = false;
-    for (auto& [id, c] : classrooms) {
-        if (c.buildingId == buildingId) buildingExists = true;
-    }
-    if (!buildingExists) return "THIS DONESNT EXISTS";
-
     for (auto& [id, c] : classrooms) {
         if (c.buildingId == buildingId && c.status == ClassroomStatus::ACTIVE && c.capacity >= seats) {
             int max_used = classTrees[id]->max_seats_used(startMin, endMin);
@@ -39,12 +33,6 @@ std::string ClassroomManager::bookAnyClassroom(const std::string& buildingId, in
 }
 
 std::string ClassroomManager::queryFreeSeats(const std::string& buildingId, int startMin, int endMin) {
-    bool buildingExists = false;
-    for (auto& [id, c] : classrooms) {
-        if (c.buildingId == buildingId) buildingExists = true;
-    }
-    if (!buildingExists) return "THIS DONESNT EXISTS";
-
     int total_free = 0;
     for (auto& [id, c] : classrooms) {
         if (c.buildingId == buildingId && c.status == ClassroomStatus::ACTIVE) {

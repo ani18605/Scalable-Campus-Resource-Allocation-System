@@ -19,8 +19,6 @@ std::string Reporter::generateOccupancyReport(const std::string& scopeType, cons
     if (scopeType == "BLOCK") {
         if (roomManager.blockRoomLists.find(scopeId) != roomManager.blockRoomLists.end()) {
             for (auto& rId : roomManager.blockRoomLists[scopeId]) process_room(roomManager.rooms[rId]);
-        } else {
-            return "THIS DONESNT EXISTS";
         }
     } else if (scopeType == "CAMPUS" && scopeId == "ALL") {
         for (auto& [id, room] : roomManager.rooms) {

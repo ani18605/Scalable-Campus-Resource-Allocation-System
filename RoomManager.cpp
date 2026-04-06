@@ -1,5 +1,4 @@
 #include "RoomManager.h"
-#include <algorithm>
 
 std::string RoomManager::addRoom(const std::string& roomId, const std::string& blockId, int floor, int capacity) {
     if (rooms.find(roomId) != rooms.end()) {
@@ -13,15 +12,7 @@ std::string RoomManager::addRoom(const std::string& roomId, const std::string& b
 }
 
 void RoomManager::finalizeBlock(const std::string& blockId) {
-    auto& list = blockRoomLists[blockId];
-    std::sort(list.begin(), list.end(), [&](const std::string& a, const std::string& b) {
-        if (rooms[a].floor != rooms[b].floor) return rooms[a].floor < rooms[b].floor;
-        return a < b;
-    });
-    for (int i = 0; i < (int)list.size(); ++i) {
-        roomIndex[list[i]].second = i;
-    }
-    int sz = list.size();
+    int sz = blockRoomLists[blockId].size();
     blockTrees[blockId] = std::make_shared<SegmentTree>(sz);
 }
 
