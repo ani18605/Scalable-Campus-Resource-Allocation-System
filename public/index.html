@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Resource Allocation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>Campus Resource Allocator</h1>
+            <p>High-performance backend monitor</p>
+        </header>
+
+        <main>
+            <div class="card form-panel">
+                <h2>Build Command Menu</h2>
+                <form id="builder-form">
+                    <div class="form-row">
+                        <select id="action-select">
+                            <option value="ADD_ROOM">Add Room</option>
+                            <option value="ADD_CLASSROOM">Add Classroom</option>
+                            <option value="ALLOCATE_ROOMS">Allocate Students</option>
+                            <option value="MAINTENANCE">Maintenance Mode</option>
+                            <option value="QUERY_FREE_ROOMS">Query Free Rooms</option>
+                            <option value="REPORT">Generate Report</option>
+                            <option value="BUILD_HOSTEL">Create Hostel Block</option>
+                            <option value="BUILD_CLASSROOM">Create Classroom Building</option>
+                            <option value="BOOK_ANY_CLASSROOM">Find & Book Classroom</option>
+                        </select>
+                    </div>
+                    <div id="dynamic-fields" class="form-row"></div>
+                    <button type="submit">Execute Action</button>
+                </form>
+            </div>
+
+            <div class="card console-panel">
+                <h2>Console Output</h2>
+                <div id="console-output" class="console">
+                    <div class="sys-msg">System initialized. UI Builder ready...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
